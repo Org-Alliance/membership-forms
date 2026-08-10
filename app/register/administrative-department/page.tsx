@@ -5,25 +5,14 @@ import { useRef, useState } from "react";
 
 import { createSupabasePublicClient } from "@/lib/supabase";
 
-type AdministrativeRoleOption =
-  | "Compliance Officer"
-  | "Meeting & Documentation Officer"
-  | "Liaison Officer";
+type AdministrativePositionOption = "Chief Administrative Officer" | "Vice Chief Administrative Officer";
 
-const ADMINISTRATIVE_ROLE_OPTIONS: readonly AdministrativeRoleOption[] = [
-  "Compliance Officer",
-  "Meeting & Documentation Officer",
-  "Liaison Officer",
+const ADMINISTRATIVE_POSITION_OPTIONS: readonly AdministrativePositionOption[] = [
+  "Chief Administrative Officer",
+  "Vice Chief Administrative Officer",
 ];
 
 const COOKIE_PREFIX = "registration_";
-
-const administrativeQuestionFieldNames = [
-  "administrativeMotivation",
-  "administrativeExperience",
-  "administrativeConfidentiality",
-  "administrativeImprovements",
-] as const;
 
 const getRegistrationCookieValue = (key: string) => {
   if (typeof document === "undefined") {
@@ -47,7 +36,7 @@ export default function AdministrativeDepartmentPage() {
   const router = useRouter();
   const supabase = createSupabasePublicClient();
   const formRef = useRef<HTMLFormElement>(null);
-  const [selectedRole, setSelectedRole] = useState<AdministrativeRoleOption | "">("");
+  const [selectedPosition, setSelectedPosition] = useState<AdministrativePositionOption | "">("");
   const [canSubmit, setCanSubmit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -74,23 +63,12 @@ export default function AdministrativeDepartmentPage() {
       return;
     }
 
-    if (!selectedRole) {
-      setSubmitError("Please select a role before submitting.");
+    if (!selectedPosition) {
+      setSubmitError("Please select a position before submitting.");
       return;
     }
 
     setSubmitError(null);
-
-    const formData = new FormData(event.currentTarget);
-    const questionAnswers: Record<string, string> = {};
-
-    administrativeQuestionFieldNames.forEach((fieldName) => {
-      const value = String(formData.get(fieldName) ?? "").trim();
-
-      if (value !== "") {
-        questionAnswers[fieldName] = value;
-      }
-    });
 
     setIsSubmitting(true);
 
@@ -98,8 +76,7 @@ export default function AdministrativeDepartmentPage() {
       first_name: firstName,
       last_name: lastName,
       email,
-      application_role: selectedRole,
-      question_answers: questionAnswers,
+      application_role: selectedPosition,
     });
 
     if (error) {
@@ -125,33 +102,6 @@ export default function AdministrativeDepartmentPage() {
           with partners and offices, the team helps maintain operational continuity, accountability, and trust.
         </p>
 
-        <section className="mt-6 space-y-3 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
-          <h2 className="text-base font-semibold text-slate-900">Administrative Roles</h2>
-          <p>
-            <span className="font-semibold text-slate-900">Compliance Officer:</span> The Compliance Officer
-            ensures that all organizational activities adhere to established policies, regulations, and ethical
-            standards. They review procedures, evaluate compliance with internal and external requirements, and
-            recommend improvements to enhance accountability and integrity. Through consistent monitoring and
-            guidance, the officer upholds transparency and promotes responsible governance within the organization.
-          </p>
-          <p>
-            <span className="font-semibold text-slate-900">Meeting &amp; Documentation Officer:</span> The
-            Meeting &amp; Documentation Officer ensures the smooth flow of leadership operations by managing
-            official communications and meeting records. They are responsible for preparing agendas, documenting
-            minutes, and maintaining the accuracy of official correspondences. Through organized and timely
-            documentation, the officer supports informed decision-making and promotes transparency within the
-            organization&apos;s leadership processes.
-          </p>
-          <p>
-            <span className="font-semibold text-slate-900">Liaison Officer:</span> The Liaison Officer
-            facilitates effective communication and coordination between the organization and external authorities.
-            They handle the delivery, retrieval, and processing of official documents, ensuring accuracy,
-            confidentiality, and timeliness. By maintaining strong professional connections with university
-            offices, partners, and other institutions, the Liaison Officer upholds the organization&apos;s
-            credibility and ensures smooth administrative correspondence.
-          </p>
-        </section>
-
         <form
           ref={formRef}
           className="mt-6 space-y-4 text-sm"
@@ -161,68 +111,24 @@ export default function AdministrativeDepartmentPage() {
         >
           <fieldset className="space-y-3 rounded-xl border border-sky-200 bg-sky-50/70 p-4 sm:col-span-2">
             <legend className="px-2 text-sm font-semibold">
-              What role would you like to apply for? <span className="text-red-600">*</span>
+              Which position would you like to apply for? <span className="text-red-600">*</span>
             </legend>
 
-            {ADMINISTRATIVE_ROLE_OPTIONS.map((role) => (
-              <label key={role} className="flex items-start gap-3 text-sm">
+            {ADMINISTRATIVE_POSITION_OPTIONS.map((position) => (
+              <label key={position} className="flex items-start gap-3 text-sm">
                 <input
                   type="radio"
-                  name="administrativeRole"
-                  value={role}
+                  name="administrativePosition"
+                  value={position}
                   className="mt-1"
-                  checked={selectedRole === role}
-                  onChange={() => setSelectedRole(role)}
+                  checked={selectedPosition === position}
+                  onChange={() => setSelectedPosition(position)}
                   required
                 />
-                <span>{role}</span>
+                <span>{position}</span>
               </label>
             ))}
           </fieldset>
-
-          {selectedRole && (
-            <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 sm:col-span-2">
-              <p className="text-sm font-medium text-slate-900">
-                These questions are intended to assess your readiness for administrative responsibilities.
-              </p>
-
-              <label className="block space-y-2 text-sm">
-                <span className="font-medium">Why are you interested in applying for the {selectedRole} position? <span className="text-red-600">*</span></span>
-                <textarea
-                  name="administrativeMotivation"
-                  className="min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-sky-500"
-                  required
-                />
-              </label>
-
-              <label className="block space-y-2 text-sm">
-                <span className="font-medium">Describe an experience where you handled documents, records, or formal coordination. What process did you follow to stay accurate and organized? <span className="text-red-600">*</span></span>
-                <textarea
-                  name="administrativeExperience"
-                  className="min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-sky-500"
-                  required
-                />
-              </label>
-
-              <label className="block space-y-2 text-sm">
-                <span className="font-medium">How would you handle confidential information and ensure compliance with policies while working under deadlines? <span className="text-red-600">*</span></span>
-                <textarea
-                  name="administrativeConfidentiality"
-                  className="min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-sky-500"
-                  required
-                />
-              </label>
-
-              <label className="block space-y-2 text-sm">
-                <span className="font-medium">What improvements would you suggest to make CNCP&apos;s administrative workflows more efficient and transparent? <span className="text-red-600">*</span></span>
-                <textarea
-                  name="administrativeImprovements"
-                  className="min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-sky-500"
-                  required
-                />
-              </label>
-            </section>
-          )}
 
           <div className="mt-6 flex items-center justify-between">
             <button

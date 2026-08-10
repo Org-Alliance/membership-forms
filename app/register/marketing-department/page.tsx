@@ -5,17 +5,12 @@ import { useRef, useState } from "react";
 
 import { createSupabasePublicClient } from "@/lib/supabase";
 
-type MarketingTeamOption = "Content Management Team" | "Content Creation Team";
+type MarketingPositionOption = "Chief Marketing Officer" | "Vice Chief Marketing Officer";
 
-const ROLE_OPTIONS_BY_TEAM: Record<MarketingTeamOption, readonly string[]> = {
-  "Content Management Team": [
-    "Caption Writer",
-    "Engagement & Statistics Analyst",
-    "Content Strategist",
-    "Social Media Manager",
-  ],
-  "Content Creation Team": ["Video Director", "Photographer", "Videographer"],
-};
+const MARKETING_POSITION_OPTIONS: readonly MarketingPositionOption[] = [
+  "Chief Marketing Officer",
+  "Vice Chief Marketing Officer",
+];
 
 const COOKIE_PREFIX = "registration_";
 
@@ -41,13 +36,10 @@ export default function MarketingDepartmentPage() {
   const router = useRouter();
   const supabase = createSupabasePublicClient();
   const formRef = useRef<HTMLFormElement>(null);
-  const [selectedTeam, setSelectedTeam] = useState<MarketingTeamOption | "">("");
-  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedPosition, setSelectedPosition] = useState<MarketingPositionOption | "">("");
   const [canSubmit, setCanSubmit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const roleOptions = selectedTeam ? ROLE_OPTIONS_BY_TEAM[selectedTeam] : [];
 
   const refreshCanSubmit = () => {
     setTimeout(() => {
@@ -71,20 +63,12 @@ export default function MarketingDepartmentPage() {
       return;
     }
 
-    if (!selectedTeam || !selectedRole) {
-      setSubmitError("Please select both team and role before submitting.");
+    if (!selectedPosition) {
+      setSubmitError("Please select a position before submitting.");
       return;
     }
 
     setSubmitError(null);
-
-    const formData = new FormData(event.currentTarget);
-    const questionAnswers = {
-      marketing_interest_motivation: String(formData.get("marketingInterestMotivation") ?? ""),
-      marketing_experience_and_skills: String(formData.get("marketingExperienceAndSkills") ?? ""),
-      marketing_feedback_and_collaboration: String(formData.get("marketingFeedbackAndCollaboration") ?? ""),
-      marketing_relevant_works_links: String(formData.get("marketingRelevantWorksLinks") ?? ""),
-    };
 
     setIsSubmitting(true);
 
@@ -92,9 +76,7 @@ export default function MarketingDepartmentPage() {
       first_name: firstName,
       last_name: lastName,
       email,
-      team: selectedTeam,
-      application_role: selectedRole,
-      question_answers: questionAnswers,
+      application_role: selectedPosition,
     });
 
     if (error) {
@@ -119,11 +101,6 @@ export default function MarketingDepartmentPage() {
           consistent, engaging, and effectively targeted to our audiences.
         </p>
 
-        <p className="mt-4 text-sm leading-6 text-slate-700">
-          Below is an overview of each role within the Content Management and Content Creation teams. Make sure
-          to review the responsibilities to find the best match for your skills and interests.
-        </p>
-
         <form
           ref={formRef}
           className="mt-6 space-y-4 text-sm"
@@ -131,147 +108,26 @@ export default function MarketingDepartmentPage() {
           onInput={refreshCanSubmit}
           onChange={refreshCanSubmit}
         >
-          <label className="block space-y-2 sm:col-span-2">
-            <span className="font-medium">What team do you want to join in the Marketing Department? <span className="text-red-600">*</span></span>
-            <select
-              name="marketingTeam"
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-sky-500"
-              required
-              value={selectedTeam}
-              onChange={(event) => {
-                setSelectedTeam(event.currentTarget.value as MarketingTeamOption | "");
-                setSelectedRole("");
-              }}
-            >
-              <option value="" disabled>
-                Select team
-              </option>
-              <option value="Content Management Team">Content Management Team</option>
-              <option value="Content Creation Team">Content Creation Team</option>
-            </select>
-          </label>
+          <fieldset className="space-y-3 rounded-xl border border-sky-200 bg-sky-50/70 p-4 sm:col-span-2">
+            <legend className="px-2 text-sm font-semibold">
+              Which position would you like to apply for? <span className="text-red-600">*</span>
+            </legend>
 
-          {selectedTeam === "Content Management Team" && (
-            <section className="space-y-3 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
-              <h2 className="text-base font-semibold text-slate-900">Content Management Team</h2>
-              <p>
-                Content Management Team is responsible for content production, distribution, and performance.
-                They ensure that all published material aligns with the brand&apos;s vision, voice, and
-                objectives while resonating with CNCP&apos;s audience. They craft messages, track engagement,
-                and optimize future campaigns.
-              </p>
-              <p>
-                <span className="font-semibold text-slate-900">Caption Writer:</span> Crafts concise and
-                engaging captions tailored for social media platforms, reflecting the brand&apos;s voice and
-                encouraging interaction.
-              </p>
-              <p>
-                <span className="font-semibold text-slate-900">Engagement &amp; Statistics Analyst:</span>
-                Tracks and analyzes engagement metrics to evaluate content performance and optimize future
-                campaigns.
-              </p>
-              <p>
-                <span className="font-semibold text-slate-900">Content Strategist:</span> Brainstorms and
-                develops content ideas, focusing on effective messaging, titles, taglines, and other key
-                elements to boost engagement.
-              </p>
-              <p>
-                <span className="font-semibold text-slate-900">Social Media Manager:</span> Manages social
-                media presence, including planning, scheduling, and publishing content, while monitoring
-                interactions and responding to inquiries.
-              </p>
-            </section>
-          )}
-
-          {selectedTeam === "Content Creation Team" && (
-            <section className="space-y-3 rounded-md border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
-              <h2 className="text-base font-semibold text-slate-900">Content Creation Team</h2>
-              <p>
-                Content Creation Team focuses on visuals and multimedia content, producing photos, videos, and
-                other creative assets that enhance CNCP&apos;s identity. They ensure the content is visually
-                appealing, aligns with the brand&apos;s aesthetics, and supports the overall marketing strategy.
-              </p>
-              <p>
-                <span className="font-semibold text-slate-900">Video Director:</span> Oversees the creative
-                direction and storytelling aspects of video content.
-              </p>
-              <p>
-                <span className="font-semibold text-slate-900">Photographer:</span> Captures high-quality
-                images for digital and print media, enhancing the brand&apos;s visual presence.
-              </p>
-              <p>
-                <span className="font-semibold text-slate-900">Videographer:</span> Shoots videos for social
-                media platforms, including video snippets, reels, and full-length promotional videos.
-              </p>
-            </section>
-          )}
-
-          {selectedTeam && (
-            <fieldset className="space-y-3 rounded-xl border border-sky-200 bg-sky-50/70 p-4 sm:col-span-2">
-              <legend className="px-2 text-sm font-semibold">
-                Which role would you like to apply for? <span className="text-red-600">*</span>
-              </legend>
-
-              {roleOptions.map((role) => (
-                <label key={role} className="flex items-start gap-3 text-sm">
-                  <input
-                    type="radio"
-                    name="marketingRole"
-                    value={role}
-                    className="mt-1"
-                    checked={selectedRole === role}
-                    onChange={() => setSelectedRole(role)}
-                    required
-                  />
-                  <span>{role}</span>
-                </label>
-              ))}
-            </fieldset>
-          )}
-
-          {selectedRole && (
-            <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 sm:col-span-2">
-              <p className="text-sm font-medium text-slate-900">
-                These questions are the same regardless of the role you apply for.
-              </p>
-
-              <label className="block space-y-2 text-sm">
-                <span className="font-medium">Why are you interested in joining the CNCP Marketing Committee, and what motivates you to apply for this specific position? <span className="text-red-600">*</span></span>
-                <textarea
-                  name="marketingInterestMotivation"
-                  className="min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-sky-500"
+            {MARKETING_POSITION_OPTIONS.map((position) => (
+              <label key={position} className="flex items-start gap-3 text-sm">
+                <input
+                  type="radio"
+                  name="marketingPosition"
+                  value={position}
+                  className="mt-1"
+                  checked={selectedPosition === position}
+                  onChange={() => setSelectedPosition(position)}
                   required
                 />
+                <span>{position}</span>
               </label>
-
-              <label className="block space-y-2 text-sm">
-                <span className="font-medium">Describe your experience and skills that make you a strong candidate for this role. Include any relevant roles or projects you have worked with. (if applicable) <span className="text-red-600">*</span></span>
-                <textarea
-                  name="marketingExperienceAndSkills"
-                  className="min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-sky-500"
-                  required
-                />
-              </label>
-
-              <label className="block space-y-2 text-sm">
-                <span className="font-medium">How do you handle feedback on your work, and how do you approach collaboration within a team? <span className="text-red-600">*</span></span>
-                <textarea
-                  name="marketingFeedbackAndCollaboration"
-                  className="min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-sky-500"
-                  required
-                />
-              </label>
-
-              <label className="block space-y-2 text-sm">
-                <span className="font-medium">Link to Relevant Works or Sample Projects. If you have any links to work that showcase your skills related to the position you&apos;re applying for, we&apos;d love to see that! (e.g., sample captions, visual projects or professional shots and videos)</span>
-                <textarea
-                  name="marketingRelevantWorksLinks"
-                  className="min-h-20 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-sky-500"
-                  placeholder="https://..."
-                />
-              </label>
-            </section>
-          )}
+            ))}
+          </fieldset>
 
           <div className="mt-6 flex items-center justify-between">
             <button

@@ -314,13 +314,8 @@ function RegisterFormPage() {
       return;
     }
 
-    if (result.data.membershipType === "Relations Department: Public") {
+    if (result.data.membershipType === "Relations Department") {
       router.push("/register/relations-department-public");
-      return;
-    }
-
-    if (result.data.membershipType === "Relations Department: Community") {
-      router.push("/register/relations-department-community");
       return;
     }
 
@@ -330,7 +325,7 @@ function RegisterFormPage() {
     }
 
     setErrors({
-      membershipType: "This department page is not available yet. Please select Technology, Operations, Creatives, Marketing, Relations Department: Public, Relations Department: Community, or Administrative Department for now.",
+      membershipType: "This department page is not available yet. Please select Technology, Operations, Creatives, Marketing, Relations Department, or Administrative Department for now.",
     });
   };
 
@@ -547,7 +542,7 @@ function RegisterFormPage() {
             </label>
 
             <label className="space-y-2 text-sm sm:col-span-2">
-              <span className="font-medium">Which department would you like to apply to as a committee member? <span className="text-red-600">*</span></span>
+              <span className="font-medium">Which department would you like to apply to as a executive/lead? <span className="text-red-600">*</span></span>
               <select
                 name="membershipType"
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-sky-500"
@@ -558,13 +553,12 @@ function RegisterFormPage() {
                 <option value="" disabled>
                   Select department
                 </option>
-                <option value="Technology Department" disabled>Technology Department</option>
-                <option value="Operations Department" disabled>Operations Department</option>
+                <option value="Technology Department">Technology Department</option>
+                <option value="Operations Department">Operations Department</option>
                 <option value="Creatives Department">Creatives Department</option>
-                <option value="Marketing Department" disabled>Marketing Department</option>
-                <option value="Relations Department: Public" disabled>Relations Department: Public</option>
-                <option value="Relations Department: Community" disabled>Relations Department: Community</option>
-                <option value="Administrative Department" disabled>Administrative Department</option>
+                <option value="Marketing Department">Marketing Department</option>
+                <option value="Relations Department">Relations Department</option>
+                <option value="Administrative Department">Administrative Department</option>
               </select>
               {errors.membershipType && <p className="text-xs text-red-600">{errors.membershipType}</p>}
             </label>
